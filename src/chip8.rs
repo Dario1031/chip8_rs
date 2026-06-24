@@ -1,5 +1,5 @@
 use std::fs;
-use rand::Rng;
+use rand::RngExt;
 
 const START_ADDR: u16 = 0x200;
 const FONTSET_START_ADDR: u16 = 0x50;
@@ -162,15 +162,93 @@ impl Chip8 {
         let vx: u8 = ((self.opcode & 0x0F00) >> 8) as u8;
         let vy: u8 = ((self.opcode & 0x00F0) >> 4) as u8;
 
-        let sum: u16 = self.registers[vx as usize] + self.registers[vy as usize];
+        let sum: u16 = 
+            self.registers[vx as usize] as u16 + 
+            self.registers[vy as usize] as u16;
         if sum > 255 {
             self.registers[0xF as usize] = 1;
         } else {
             self.registers[0xF as usize] = 0;
         }
 
-        // Figure out what to cast this to
-        self.registers[vx as usize] = sum & 0x00FF;
+        self.registers[vx as usize] = (sum & 0x00FF) as u8;
+    }
+
+    fn op_8xy5(&mut self) {
+        let vx: u8 = ((self.opcode & 0x0F00) >> 8) as u8;
+        let vy: u8 = ((self.opcode & 0x00F0) >> 4) as u8;
+
+        if self.registers[vx as usize] > self.registers[vy as usize] {
+            self.registers[0xF as usize] = 1;
+        } else {
+            self.registers[0xF as usize] = 0;
+        }
+
+        // wrapping sub in case of subtraction underflow
+        self.registers[vx as usize] =
+            self.registers[vx as usize].wrapping_sub(self.registers[vy as usize]);
+    }
+
+    fn op_8xy6(&mut self) {
+        let vx: u8 = ((self.opcode & 0x0F00) >> 8) as u8;
+
+        self.registers[0xF as usize] = self.registers[vx as usize] & 0x1;
+        // divide by 2 == right shift 1
+        self.registers[vx as usize] = self.registers[vx as usize] >> 1;
+    }
+
+    fn op_8xy7(&mut self) {
+        let vx: u8 = ((self.opcode & 0x0F00) >> 8) as u8;
+        let vy: u8 = ((self.opcode & 0x00F0) >> 4) as u8;
+
+        if self.registers[vx as usize] < self.registers[vy as usize] {
+            self.registers[0xF as usize] = 1;
+        } else {
+            self.registers[0xF as usize] = 0;
+        }
+
+        // wrapping sub in case of subtraction underflow
+        self.registers[vx as usize] =
+            self.registers[vy as usize].wrapping_sub(self.registers[vx as usize]);
+    }
+
+    fn op_8xye(&mut self) {
+        let vx: u8 = ((self.opcode & 0x0F00) >> 8) as u8;
+
+        self.registers[0xF as usize] = (self.registers[vx as usize] & 0x80) >> 7;
+        // multiply by 2 == left shift 1
+        self.registers[vx as usize] = self.registers[vx as usize] << 1;
+    }
+
+    fn op_9xy0(&mut self) {
+        let vx: u8 = ((self.opcode & 0x0F00) >> 8) as u8;
+        let vy: u8 = ((self.opcode & 0x00F0) >> 4) as u8;
+
+        if self.registers[vx as usize] != self.registers[vy as usize] {
+            self.pc += 2;
+        }
+    }
+
+    fn op_annn(&mut self) {
+        let address = self.opcode & 0x0FFF;
+        self.index = address;
+    }
+
+    fn op_bnnn(&mut self) {
+        let address = self.opcode & 0x0FFF;
+        self.pc = self.registers[0] as u16 + address;
+    }
+
+    fn op_cxkk(&mut self) {
+        let vx: u8 = ((self.opcode & 0x0F00) >> 8) as u8;
+        let kk: u8 = (self.opcode & 0x00FF) as u8;
+
+        let mut rng = rand::rng();
+        let random_byte: u8 = rng.random();
+
+        self.registers[vx as usize] = random_byte & kk;
+
+
     }
 
 }
