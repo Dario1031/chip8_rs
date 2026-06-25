@@ -21,8 +21,8 @@ const FONTSET: [u8; 80] = [
     0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
     0xF0, 0x80, 0xF0, 0x80, 0x80, // F
 ];
-const VIDEO_WIDTH: usize = 64;
-const VIDEO_HEIGHT: usize = 32;
+pub const VIDEO_WIDTH: usize = 64;
+pub const VIDEO_HEIGHT: usize = 32;
 
 pub struct Chip8 {
     registers: [u8; 16],
@@ -33,8 +33,8 @@ pub struct Chip8 {
     sp: u8,
     delay_timer: u8,
     sound_timer: u8,
-    keypad: [u8; 16],
-    screen: [u32; VIDEO_WIDTH * VIDEO_HEIGHT],
+    pub keypad: [u8; 16],
+    pub screen: [u32; VIDEO_WIDTH * VIDEO_HEIGHT],
     opcode: u16,
 }
 
@@ -129,7 +129,7 @@ impl Chip8 {
         let vx: u8 = ((self.opcode & 0x0F00) >> 8) as u8;
         let kk: u8 = (self.opcode & 0x00FF) as u8;
 
-        self.registers[vx as usize] += kk;
+        self.registers[vx as usize] = self.registers[vx as usize].wrapping_add(kk);
     }
 
     fn op_8xy0(&mut self) {
@@ -369,6 +369,87 @@ impl Chip8 {
 
         for i in 0..vx {
             self.registers[i as usize] = self.memory[self.index as usize + i as usize];
+        }
+    }
+
+    fn op_null(&mut self) {
+        panic!("Unknown opcode: {:04X}", self.opcode);
+    }
+
+    pub fn decode_and_execute_opcode(&mut self) {
+        match self.opcode & 0xF000 {
+            0x0000 => match self.opcode & 0x000F {
+                0x0000 => self.op_00e0(),
+                0x000E => self.op_00ee(),
+                _ => self.op_null(),
+            },
+
+            0x1000 => self.op_1nnn(),
+            0x2000 => self.op_2nnn(),
+            0x3000 => self.op_3xkk(),
+            0x4000 => self.op_4xkk(),
+            0x5000 => self.op_5xy0(),
+            0x6000 => self.op_6xkk(),
+            0x7000 => self.op_7xkk(),
+
+            0x8000 => match self.opcode & 0x000F {
+                0x0000 => self.op_8xy0(),
+                0x0001 => self.op_8xy1(),
+                0x0002 => self.op_8xy2(),
+                0x0003 => self.op_8xy3(),
+                0x0004 => self.op_8xy4(),
+                0x0005 => self.op_8xy5(),
+                0x0006 => self.op_8xy6(),
+                0x0007 => self.op_8xy7(),
+                0x000E => self.op_8xye(),
+                _ => self.op_null(),
+            },
+
+            0x9000 => self.op_9xy0(),
+            0xA000 => self.op_annn(),
+            0xB000 => self.op_bnnn(),
+            0xC000 => self.op_cxkk(),
+            0xD000 => self.op_dxyn(),
+
+            0xE000 => match self.opcode & 0x00FF {
+                0x009E => self.op_ex9e(),
+                0x00A1 => self.op_exa1(),
+                _ => self.op_null(),
+            },
+
+            0xF000 => match self.opcode & 0x00FF {
+                0x0007 => self.op_fx07(),
+                0x000A => self.op_fx0a(),
+                0x0015 => self.op_fx15(),
+                0x0018 => self.op_fx18(),
+                0x001E => self.op_fx1e(),
+                0x0029 => self.op_fx29(),
+                0x0033 => self.op_fx33(),
+                0x0055 => self.op_fx55(),
+                0x0065 => self.op_fx65(),
+                _ => self.op_null(),
+            },
+
+            _ => self.op_null(),
+        }
+    }
+
+    pub fn cycle(&mut self) {
+        // fetch
+        let opcode: u16 = ((self.memory[self.pc as usize] as u16) << 8) | self.memory[self.pc as usize + 1] as u16;
+
+        self.pc += 2;
+
+        // decode and execute
+        self.opcode = opcode;
+        self.decode_and_execute_opcode();
+
+        if self.delay_timer > 0 {
+            self.delay_timer -= 1;
+        }
+
+        if self.sound_timer > 0 {
+            self.sound_timer -= 1;
         }
     }
 
