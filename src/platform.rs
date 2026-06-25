@@ -7,34 +7,16 @@ pub struct Platform {
 }
 
 impl Platform {
-    pub fn new(
-        title: &str,
-        window_width: usize,
-        window_height: usize,
-        texture_width: usize,
-        texture_height: usize,
-    ) -> Self {
-        let mut window = Window::new(
-            title,
-            window_width,
-            window_height,
-            WindowOptions::default(),
-        )
-        .expect("Failed to create window");
+    pub fn new(title: &str, window_width: usize, window_height: usize, texture_width: usize, texture_height: usize,) -> Self {
+        let mut window = Window::new(title, window_width, window_height, WindowOptions::default(),).expect("Failed to create window");
 
-        window.set_target_fps(60);
+        // window.set_target_fps(60);
 
-        Self {
-            window,
-            width: texture_width,
-            height: texture_height,
-        }
+        Self {window, width: texture_width, height: texture_height,}
     }
 
     pub fn update(&mut self, buffer: &[u32]) {
-        self.window
-            .update_with_buffer(buffer, self.width, self.height)
-            .expect("Failed to update window buffer");
+        self.window.update_with_buffer(buffer, self.width, self.height).expect("Failed to update window buffer");
     }
 
     pub fn process_input(&mut self, keys: &mut [u8; 16]) -> bool {

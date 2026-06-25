@@ -266,7 +266,9 @@ impl Chip8 {
             // sprites guaranteed to be 8px wide -> 8 columns
             for col in 0..8 {
                 let sprite_pixel: u8 = sprite_byte & (0x80 >> col);
-                let screen_index = (y_pos as usize + i as usize) * VIDEO_WIDTH + (x_pos as usize + col as usize);
+                let y = (y_pos as usize + i as usize) % VIDEO_HEIGHT;
+                let x = (x_pos as usize + col as usize) % VIDEO_WIDTH;
+                let screen_index = y * VIDEO_WIDTH + x;
                 let screen_pixel: u32 = self.screen[screen_index];
                 if sprite_pixel != 0 {
                     if screen_pixel == 0xFFFFFFFF {

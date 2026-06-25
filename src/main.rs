@@ -11,7 +11,7 @@ fn main() {
     let args: Vec<String> = env::args().collect();
 
     if args.len() != 4 {
-        eprintln!("Usage: chip8 <scale> <delay_ms> <rom>");
+        eprintln!("Usage: cargo run <scale> <delay_ms> <rom>");
         std::process::exit(1);
     }
 
