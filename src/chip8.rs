@@ -32,8 +32,8 @@ pub struct Chip8 {
     sp: u8,
     delay_timer: u8,
     sound_timer: u8,
-    pub keypad: [u8; 16],
-    pub screen: [u32; VIDEO_WIDTH * VIDEO_HEIGHT],
+    keypad: [u8; 16],
+    screen: [u32; VIDEO_WIDTH * VIDEO_HEIGHT],
     opcode: u16,
 }
 
@@ -65,6 +65,18 @@ impl Chip8 {
         for (i, &byte) in rom.iter().enumerate() {
             self.memory[START_ADDR as usize + i] = byte;
         }
+    }
+
+    pub fn framebuffer(&self) -> &[u32; VIDEO_WIDTH * VIDEO_HEIGHT] {
+        return &self.screen;
+    }
+
+    pub fn key_down(&mut self, key: usize) {
+        self.keypad[key] = 1;
+    }
+
+    pub fn key_up(&mut self, key: usize) {
+        self.keypad[key] = 0;
     }
 
     fn op_00e0(&mut self) {

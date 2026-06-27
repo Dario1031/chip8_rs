@@ -37,7 +37,7 @@ fn main() {
     let mut last_cycle_time = Instant::now();
 
     loop {
-        let quit = platform.process_input(&mut chip8.keypad);
+        let quit = platform.process_input(&mut chip8);
 
         if quit {
             break;
@@ -50,7 +50,7 @@ fn main() {
 
             chip8.cycle();
 
-            platform.update(&chip8.screen);
+            platform.update(chip8.framebuffer());
         }
     }
 }

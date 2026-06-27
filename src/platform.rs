@@ -1,4 +1,7 @@
+#![cfg(not(target_arch = "wasm32"))]
+
 use minifb::{Key, Window, WindowOptions};
+use crate::chip8::Chip8;
 
 pub struct Platform {
     window: Window,
@@ -17,23 +20,33 @@ impl Platform {
         self.window.update_with_buffer(buffer, self.width, self.height).expect("Failed to update window buffer");
     }
 
-    pub fn process_input(&mut self, keys: &mut [u8; 16]) -> bool {
-        keys[0x0] = self.window.is_key_down(Key::X) as u8;
-        keys[0x1] = self.window.is_key_down(Key::Key1) as u8;
-        keys[0x2] = self.window.is_key_down(Key::Key2) as u8;
-        keys[0x3] = self.window.is_key_down(Key::Key3) as u8;
-        keys[0x4] = self.window.is_key_down(Key::Q) as u8;
-        keys[0x5] = self.window.is_key_down(Key::W) as u8;
-        keys[0x6] = self.window.is_key_down(Key::E) as u8;
-        keys[0x7] = self.window.is_key_down(Key::A) as u8;
-        keys[0x8] = self.window.is_key_down(Key::S) as u8;
-        keys[0x9] = self.window.is_key_down(Key::D) as u8;
-        keys[0xA] = self.window.is_key_down(Key::Z) as u8;
-        keys[0xB] = self.window.is_key_down(Key::C) as u8;
-        keys[0xC] = self.window.is_key_down(Key::Key4) as u8;
-        keys[0xD] = self.window.is_key_down(Key::R) as u8;
-        keys[0xE] = self.window.is_key_down(Key::F) as u8;
-        keys[0xF] = self.window.is_key_down(Key::V) as u8;
+    pub fn process_input(&mut self, chip8: &mut Chip8) -> bool {
+        let mappings = [
+            (Key::X, 0x0),
+            (Key::Key1, 0x1),
+            (Key::Key2, 0x2),
+            (Key::Key3, 0x3),
+            (Key::Q, 0x4),
+            (Key::W, 0x5),
+            (Key::E, 0x6),
+            (Key::A, 0x7),
+            (Key::S, 0x8),
+            (Key::D, 0x9),
+            (Key::Z, 0xA),
+            (Key::C, 0xB),
+            (Key::Key4, 0xC),
+            (Key::R, 0xD),
+            (Key::F, 0xE),
+            (Key::V, 0xF),
+        ];
+
+        for (key, chip8_key) in mappings {
+            if self.window.is_key_down(key) {
+                chip8.key_down(chip8_key);
+            } else {
+                chip8.key_up(chip8_key);
+            }
+        }
 
         !self.window.is_open() || self.window.is_key_down(Key::Escape)
     }
