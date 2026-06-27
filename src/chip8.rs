@@ -1,4 +1,3 @@
-use std::fs;
 use rand::RngExt;
 
 const START_ADDR: u16 = 0x200;
@@ -62,9 +61,7 @@ impl Chip8 {
 
     }
 
-    pub fn load_rom(&mut self, file_path: &str) {
-        let rom = fs::read(file_path).expect("Failed to read ROM file");
-
+    pub fn load_rom(&mut self, rom: &[u8]) {
         for (i, &byte) in rom.iter().enumerate() {
             self.memory[START_ADDR as usize + i] = byte;
         }

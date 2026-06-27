@@ -7,6 +7,8 @@ use std::time::{Duration, Instant};
 use chip8::{Chip8, VIDEO_HEIGHT, VIDEO_WIDTH};
 use platform::Platform;
 
+use std::fs;
+
 fn main() {
     let args: Vec<String> = env::args().collect();
 
@@ -28,7 +30,8 @@ fn main() {
     );
 
     let mut chip8 = Chip8::new();
-    chip8.load_rom(rom_path);
+    let rom = fs::read(rom_path).expect("Failed to read ROM file");
+    chip8.load_rom(&rom);
 
     let cycle_delay = Duration::from_millis(cycle_delay_ms);
     let mut last_cycle_time = Instant::now();
