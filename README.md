@@ -58,6 +58,10 @@ This generates a `pkg/` directory containing the compiled WebAssembly module and
 
 > **Note:** The `pkg/` directory is generated and is intentionally not committed to the repository. Anyone cloning the project should generate it locally using the command above.
 
+
+## Web Demo
+https://github.com/user-attachments/assets/f08a82b6-07c0-4ce9-baab-0200644d1e76
+
 ## Project Structure
 
 ```text
