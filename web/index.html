@@ -5,11 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Chip-8</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="index.css">
   </head>
   <body>
-    <label for="romInput">ROM:</label>
-    <input name="romInput" id="romInput" type="file" accept=".ch8">
+
+    <div class="input-container">
+      <label for="romInput">ROM:</label>
+      <input name="romInput" id="romInput" type="file" accept=".ch8" autocomplete="off">
+
+      <label for=""videoScale>Video Scale (Integer Value):</label>
+      <input name="videoScale" id="videoScale" type="text" autocomplete="off">
+
+      <label for=""msDelay>Delay (ms):</label>
+      <input name="msDelay" id="msDelay" type="text" autocomplete="off">
+
+      <button id="playButton">Play</button>
+    </div>
+
+    <canvas id="screen"></canvas>
+
     <script type="module" src="index.js"></script>
   </body>
 </html>
